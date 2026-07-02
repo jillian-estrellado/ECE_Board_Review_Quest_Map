@@ -68,24 +68,65 @@ table{min-width:560px}th,td{padding:8px;font-size:12px}details.chapter{margin-bo
 .weakItem{display:flex;justify-content:space-between;gap:10px;align-items:flex-start;background:var(--darkPanel);border:1px solid var(--border);border-radius:10px;padding:10px}
 @media(max-width:880px){.innerChapter{margin-left:0!important}.weakItem{display:grid}.subjectHead h3{font-size:16px!important}}
 
+
+.mapSubjectCard{cursor:pointer;transition:border-color .15s ease, transform .15s ease}
+.mapSubjectCard:hover{border-color:var(--accent)!important;transform:translateY(-1px)}
+.mapOpenBtn{width:auto}
+
+
+/* Mobile compact header + logbook controls */
+.backupCard{margin:10px 0}
+.backupCard h3{margin:0 0 4px}
+.compactMission{padding:10px!important}
+.missionHeader,.missionMini{display:flex;justify-content:space-between;gap:8px;align-items:center}
+.missionHeader b{font-size:14px}
+.missionHeader span{font-weight:900;color:#fef3c7}
+.missionMini{font-size:12px;color:var(--muted);margin:6px 0}
+@media(max-width:900px){
+  .hero{display:flex!important;align-items:center;justify-content:space-between;gap:8px;margin:0 0 6px!important;padding:2px 2px 0}
+  .hero .eyebrow{display:block!important;font-size:10px!important;letter-spacing:.06em;white-space:nowrap;color:var(--gold)}
+  .hero h1{font-size:18px!important;line-height:1!important;margin:0!important;white-space:nowrap}
+  .hero .subtitle{display:none!important}
+  .sidebar{max-height:none;overflow:visible}
+  .hud{grid-template-columns:repeat(4,1fr)!important;gap:4px!important}
+  .hud .box{padding:5px 3px!important;border-radius:9px!important}
+  .hud strong{font-size:15px!important}
+  .hud span{font-size:8px!important;line-height:1.05}
+  .bar{height:6px!important}
+  .small[style*="Overall"], .sidebar > .small{font-size:10px!important;margin:6px 0 3px!important}
+  .missionCard{margin-top:6px!important;border-radius:10px!important}
+  .missionHeader b{font-size:12px}
+  .missionMini{font-size:10px;margin:4px 0}
+  .miniAction{grid-template-columns:70px 1fr!important;gap:5px!important}
+  .miniAction select,.miniAction button{padding:6px!important;font-size:11px!important}
+  .controls{margin-top:6px!important}
+  .controls input,.controls select{padding:8px!important;font-size:12px!important}
+  .tabs{top:0;padding:5px 0!important;margin-bottom:6px!important}
+  .tab{font-size:10px!important;padding:6px 7px!important}
+  .mobileStickyNav{grid-template-columns:repeat(5,1fr)!important;gap:4px!important;padding:6px!important;border-radius:14px!important}
+  .mobileStickyNav button{font-size:10px!important;line-height:1.05;padding:6px 2px!important;border-radius:10px!important}
+  .contentHead h2{font-size:18px!important}
+  .backupCard .two{grid-template-columns:1fr 1fr}
+}
+
 </style>
 </head>
 <body>
 <div class="app">
   <section class="hero">
-    <div class="eyebrow">ECE / ECAM Board Review • 2026 weighted quest map</div>
-    <h1>Electronics Engineering Board Review Quest Map</h1>
-    <p class="subtitle">Weighted review map with questions, practice, notes, and spaced review.</p>
+    <div class="eyebrow">⚡ ECE / ECAM Board Review</div>
+    <h1>Quest Map</h1>
+    <p class="subtitle">Questions • practice • notes • review</p>
   </section>
   <div class="layout">
     <aside class="panel sidebar">
       <div class="hud">
-        <div class="box"><strong id="doneCount">0</strong><span>quests done</span></div>
-        <div class="box"><strong id="totalCount">0</strong><span>total quests</span></div>
-        <div class="box"><strong id="xpCount">0</strong><span>XP earned</span></div>
-        <div class="box"><strong id="levelCount">1</strong><span>level</span></div>
+        <div class="box"><strong id="doneCount">0</strong><span>✅ done</span></div>
+        <div class="box"><strong id="totalCount">0</strong><span>🎯 total</span></div>
+        <div class="box"><strong id="xpCount">0</strong><span>⚡ XP</span></div>
+        <div class="box"><strong id="levelCount">1</strong><span>🏅 level</span></div>
       </div>
-      <div style="margin:12px 0 4px" class="small">Overall progress</div>
+      <div style="margin:12px 0 4px" class="small">📊 Overall</div>
       <div class="bar"><div id="progressBar"></div></div>
       <div id="dailyMission"></div>
       <div class="controls">
@@ -99,15 +140,6 @@ table{min-width:560px}th,td{padding:8px;font-size:12px}details.chapter{margin-bo
           <option value="done">Done only</option>
           <option value="due">Due for review</option>
         </select>
-        <div class="callout" style="margin:6px 0 0;padding:10px;font-size:12px">
-          <b>Backup / transfer:</b> Export saves quests, finish dates, review dates, weak marks, practice checkboxes, topic notes, and global notes into one JSON file. Import restores them in another browser.
-        </div>
-        <div class="two">
-          <button class="secondary" id="exportBtn">Export</button>
-          <label class="secondary" style="text-align:center;cursor:pointer">Import<input type="file" id="importFile" class="hidden" accept="application/json" /></label>
-        </div>
-        <div id="backupStatus" class="small" style="min-height:18px"></div>
-        <button class="danger" id="resetBtn">Reset Progress</button>
       </div>
       <div class="subjectList" id="subjectList"></div>
     </aside>
@@ -119,7 +151,7 @@ table{min-width:560px}th,td{padding:8px;font-size:12px}details.chapter{margin-bo
         <button class="tab" data-view="mock">Mock Plan</button>
         <button class="tab" data-view="practice">Practice</button>
         <button class="tab" data-view="review">Review</button>
-        <button class="tab" data-view="notes">Notes</button>
+        <button class="tab" data-view="notes">📓 Logbook</button>
       </div>
       <section id="view-map"></section>
       <section id="view-quests" class="hidden"></section>
@@ -128,11 +160,11 @@ table{min-width:560px}th,td{padding:8px;font-size:12px}details.chapter{margin-bo
       <section id="view-practice" class="hidden"></section>
       <section id="view-review" class="hidden"></section>
       <section id="view-notes" class="hidden"></section>
-      <div class="footer">Local progress is saved in this browser only. Use Export/Import when switching browser, device, or file location.</div>
+      <div class="footer">Progress is local to this browser. Use 📓 Logbook → Export before switching devices.</div>
     </main>
   </div>
 </div>
-<div class="mobileStickyNav" id="mobileStickyNav"><button data-view="map">Map</button><button data-view="quests">Quests</button><button data-view="review">Review</button><button data-view="practice">Practice</button></div>
+<div class="mobileStickyNav" id="mobileStickyNav"><button data-view="map">🗺️<br>Map</button><button data-view="quests">⚔️<br>Quests</button><button data-view="review">🔁<br>Review</button><button data-view="practice">📝<br>Practice</button><button data-view="notes">📓<br>Log</button></div>
 <script>
 const STORAGE_KEY='ece_board_quest_map_2026_v1';
 
@@ -358,9 +390,21 @@ const quests=makeQuests();
 function getFiltered(){let term=document.getElementById('search')?.value.toLowerCase()||'';let filter=document.getElementById('filter')?.value||'all';return quests.filter(q=>{if(state.subject!=='all'&&q.subject!==state.subject)return false; let hay=(q.subjectTitle+' '+q.chapter+' '+q.item).toLowerCase(); if(term&&!hay.includes(term))return false; if(filter==='new'&&!q.nt)return false; if(filter==='core'&&!q.core)return false; if(filter==='weak'&&!state.weak[q.id])return false; if(filter==='undone'&&state.done[q.id])return false; if(filter==='done'&&!state.done[q.id])return false;
   if(filter==='due'&&!(state.done[q.id]&&reviewStatus(q.id).due))return false; return true;});}
 function stats(){let done=quests.filter(q=>state.done[q.id]).length;let xp=quests.filter(q=>state.done[q.id]).reduce((a,q)=>a+q.xp,0);let level=Math.max(1,Math.floor(xp/350)+1);let today=state.daily?.[dayKey()]||{quests:0,reviews:0,practice:0};return{done,total:quests.length,xp,level,levelTitle:levelTitle(level),pct:quests.length?done/quests.length*100:0,streak:currentStreak(),today};}
-function renderMission(s){const el=document.getElementById('dailyMission');if(!el)return;const target=state.dailyTarget||3;const qDone=s.today.quests||0;const due=quests.filter(q=>state.done[q.id]&&reviewStatus(q.id).due).length;const progress=Math.min(100,(qDone/target)*100);const nextText=due?`${due} review item${due===1?'':'s'} due first`:'next unfinished quest';el.innerHTML=`<div class="missionCard"><h3>Today</h3><div class="missionLine"><span>Quest target</span><b>${qDone}/${target}</b></div><div class="miniBar"><div style="width:${progress}%"></div></div><div class="missionLine"><span>Streak</span><b>${s.streak} day${s.streak===1?'':'s'}</b></div><div class="missionLine"><span>Next action</span><b>${nextText}</b></div><div class="motivationText">${motivationalLine(s)}</div><div class="miniAction"><select id="targetSelect"><option value="1" ${target===1?'selected':''}>Low energy: 1</option><option value="3" ${target===3?'selected':''}>Normal: 3</option><option value="5" ${target===5?'selected':''}>Beast mode: 5</option></select><button class="primary" id="nextActionBtn">Start now</button></div></div>`;const sel=document.getElementById('targetSelect');if(sel)sel.onchange=e=>{state.dailyTarget=parseInt(e.target.value,10);save();render();};const btn=document.getElementById('nextActionBtn');if(btn)btn.onclick=()=>{state.view=due?'review':'quests';save();render();};}
+function renderMission(s){
+ const el=document.getElementById('dailyMission');if(!el)return;
+ const target=state.dailyTarget||3;
+ const qDone=s.today.quests||0;
+ const due=quests.filter(q=>state.done[q.id]&&reviewStatus(q.id).due).length;
+ const progress=Math.min(100,(qDone/target)*100);
+ const nextText=due?`${due} due`:'next quest';
+ el.innerHTML=`<div class="missionCard compactMission"><div class="missionHeader"><b>🔥 Today</b><span>${qDone}/${target}</span></div><div class="miniBar"><div style="width:${progress}%"></div></div><div class="missionMini"><span>🔥 ${s.streak}d</span><span>🔁 ${nextText}</span></div><div class="miniAction"><select id="targetSelect"><option value="1" ${target===1?'selected':''}>🌱 1</option><option value="3" ${target===3?'selected':''}>⚡ 3</option><option value="5" ${target===5?'selected':''}>🚀 5</option></select><button class="primary" id="nextActionBtn">Start</button></div></div>`;
+ const sel=document.getElementById('targetSelect');if(sel)sel.onchange=e=>{state.dailyTarget=parseInt(e.target.value,10);save();render();};
+ const btn=document.getElementById('nextActionBtn');if(btn)btn.onclick=()=>{state.view=due?'review':'quests';save();render();};
+}
 function renderSidebar(){let s=stats();doneCount.textContent=s.done;totalCount.textContent=s.total;xpCount.textContent=s.xp;levelCount.textContent=s.level;progressBar.style.width=s.pct+'%';renderMission(s);subjectList.innerHTML='';let all=document.createElement('button');all.className='subjectBtn '+(state.subject==='all'?'active':'');all.innerHTML=`<b>All Subjects <span>${s.done}/${s.total}</span></b><div class="small">Level ${s.level}: ${s.levelTitle} • ${s.streak}-day streak</div>`;all.onclick=()=>{state.subject='all';save();render();};subjectList.appendChild(all);subjects.forEach(sub=>{let qs=quests.filter(q=>q.subject===sub.id);let d=qs.filter(q=>state.done[q.id]).length;let b=document.createElement('button');b.className='subjectBtn '+(state.subject===sub.id?'active ':'')+(d===qs.length?'done':'');b.innerHTML=`<b>${sub.title} <span>${d}/${qs.length}</span></b><div class="small">${sub.weight}% • ${sub.priority}</div><div class="bar" style="margin-top:7px"><div style="width:${d/qs.length*100}%"></div></div>`;b.onclick=()=>{state.subject=sub.id;save();render();};subjectList.appendChild(b);});}
-function renderMap(){const el=document.getElementById('view-map');let totalXP=quests.reduce((a,q)=>a+q.xp,0);const s=stats();const mission=`<div class="winCard"><b>Your job today is not to feel motivated.</b> It is to make one small visible win. Finish one quest, tick one practice link, or review one due item. Motivation usually arrives after action, not before it.</div>`;el.innerHTML=mission+`<div class="contentHead"><h2>Content Map First</h2><p class="small">Start here. The subject percentages are official weights; the detailed subtopics are used as a planning guide. New/expanded areas get special treatment, but the classic high-yield foundations still matter.</p></div><div class="mapGrid">${subjects.map(s=>{let qs=quests.filter(q=>q.subject===s.id);let xp=qs.reduce((a,q)=>a+q.xp,0);let nt=qs.filter(q=>q.nt).length;return `<div class="mapCard"><h3>${s.title}</h3><p><b>${s.weight}% official weight</b> • ${qs.length} quests • ${xp} XP</p><p>${s.note}</p><div class="badges" style="margin-top:8px"><span class="badge ${s.weight===30?'bad':'warn'}">${s.priority}</span><span class="badge purple">${nt} New</span></div></div>`}).join('')}</div><div class="callout"><b>Personal strategy because you failed before:</b> do not start by rereading everything. Your first phase should be diagnostic: finish the New audit, then hit Math/Circuits/Comms timed drills. Your risk is not intelligence; it is spreading effort equally across unequal topics.</div><div class="tableWrap"><table><thead><tr><th>Subject</th><th>Official weight</th><th>Quest allocation</th><th>New-threat pressure</th><th>Training instruction</th></tr></thead><tbody>${subjects.map(s=>{let qs=quests.filter(q=>q.subject===s.id);let nt=qs.filter(q=>q.nt).length;return `<tr><td><b>${s.title}</b></td><td>${s.weight}%</td><td>${qs.length} quests</td><td>${nt} flagged items</td><td>${s.note}</td></tr>`}).join('')}</tbody></table></div>`;}
+function renderMap(){const el=document.getElementById('view-map');let totalXP=quests.reduce((a,q)=>a+q.xp,0);const s=stats();const mission=`<div class="winCard"><b>Your job today is not to feel motivated.</b> It is to make one small visible win. Finish one quest, tick one practice link, or review one due item. Motivation usually arrives after action, not before it.</div>`;el.innerHTML=mission+`<div class="contentHead"><h2>Content Map First</h2><p class="small">Start here. The subject percentages are official weights; the detailed subtopics are used as a planning guide. New/expanded areas get special treatment, but the classic high-yield foundations still matter.</p></div><div class="mapGrid">${subjects.map(s=>{let qs=quests.filter(q=>q.subject===s.id);let xp=qs.reduce((a,q)=>a+q.xp,0);let nt=qs.filter(q=>q.nt).length;return `<div class="mapCard mapSubjectCard" data-sub="${s.id}"><h3>${s.title}</h3><p><b>${s.weight}% official weight</b> • ${qs.length} quests • ${xp} XP</p><p>${s.note}</p><div class="badges" style="margin-top:8px"><span class="badge ${s.weight===30?'bad':'warn'}">${s.priority}</span><span class="badge purple">${nt} New</span></div><button class="secondary mapOpenBtn" data-sub="${s.id}" style="margin-top:10px;padding:7px 10px;font-size:12px">Open quests</button></div>`}).join('')}</div><div class="callout"><b>Personal strategy because you failed before:</b> do not start by rereading everything. Your first phase should be diagnostic: finish the New audit, then hit Math/Circuits/Comms timed drills. Your risk is not intelligence; it is spreading effort equally across unequal topics.</div><div class="tableWrap"><table><thead><tr><th>Subject</th><th>Official weight</th><th>Quest allocation</th><th>New-threat pressure</th><th>Training instruction</th></tr></thead><tbody>${subjects.map(s=>{let qs=quests.filter(q=>q.subject===s.id);let nt=qs.filter(q=>q.nt).length;return `<tr><td><b>${s.title}</b></td><td>${s.weight}%</td><td>${qs.length} quests</td><td>${nt} flagged items</td><td>${s.note}</td></tr>`}).join('')}</tbody></table></div>`;
+ document.querySelectorAll('.mapSubjectCard,.mapOpenBtn').forEach(elm=>elm.onclick=(e)=>{const sub=(e.currentTarget.dataset.sub);state.subject=sub;state.filter='all';state.view='quests';save();render();setTimeout(()=>window.scrollTo({top:0,behavior:'smooth'}),0);});
+}
 function renderQuests(){
  const el=document.getElementById('view-quests');
  let f=getFiltered();
@@ -379,7 +423,7 @@ function renderQuests(){
    const due=items.filter(q=>state.done[q.id]&&reviewStatus(q.id).due).length;
    const weak=items.filter(q=>state.weak[q.id]).length;
    const xp=items.reduce((a,q)=>a+q.xp,0);
-   const openSub=(state.subject===subKey||sidx===0||due>0||weak>0)?' open':'';
+   const openSub=(state.subject===subKey||due>0||weak>0)?' open':'';
    let chapters={};
    items.forEach(q=>{chapters[q.chapter]=chapters[q.chapter]||[];chapters[q.chapter].push(q);});
    const chapterHTML=Object.keys(chapters).map((ch,cidx)=>{
@@ -450,13 +494,15 @@ function weakTopicsHTML(){
 }
 function renderNotes(){
  const el=document.getElementById('view-notes');
- el.innerHTML=`<div class="contentHead"><h2>Notes</h2><p class="small">Global mistake log plus weak-topic shortcut list.</p></div>${weakTopicsHTML()}<textarea id="notesBox" class="notes" placeholder="Mistake log, formulas, weak topics, review reminders...">${state.notes||''}</textarea><div style="margin-top:10px"><button class="primary" id="saveNotes">Save Notes</button></div>`;
- document.getElementById('saveNotes').onclick=()=>{state.notes=document.getElementById('notesBox').value;save();alert('Notes saved.');};
+ const backupBox=`<div class="card backupCard"><h3>💾 Backup & Transfer</h3><p class="small">Use this before changing browser, phone, or file location.</p><div class="two"><button class="secondary" id="exportBtn">⬇️ Export</button><label class="secondary" style="text-align:center;cursor:pointer">⬆️ Import<input type="file" id="importFile" class="hidden" accept="application/json" /></label></div><div id="backupStatus" class="small" style="min-height:18px;margin-top:6px"></div><button class="danger" id="resetBtn" style="margin-top:8px">🧹 Reset Progress</button></div>`;
+ el.innerHTML=`<div class="contentHead"><h2>📓 Logbook</h2><p class="small">Weak topics, mistake log, and backup tools.</p></div>${backupBox}${weakTopicsHTML()}<textarea id="notesBox" class="notes" placeholder="Mistake log, formulas, weak topics, review reminders...">${state.notes||''}</textarea><div style="margin-top:10px"><button class="primary" id="saveNotes">Save Logbook</button></div>`;
+ document.getElementById('saveNotes').onclick=()=>{state.notes=document.getElementById('notesBox').value;save();alert('Logbook saved.');};
  document.querySelectorAll('.openWeakBtn').forEach(btn=>btn.onclick=()=>{const q=quests.find(x=>x.id===btn.dataset.id);if(!q)return;state.subject=q.subject;state.filter='weak';state.view='quests';save();render();});
+ attachBackupHandlers();
 }
 function render(){renderSidebar();document.querySelectorAll('section[id^="view-"]').forEach(x=>x.classList.add('hidden'));document.getElementById('view-'+state.view).classList.remove('hidden');
 document.addEventListener('toggle',e=>{if(e.target.matches('.lessonDrawer')&&e.target.open){document.querySelectorAll('.lessonDrawer[open]').forEach(d=>{if(d!==e.target)d.open=false;});}},true);
-document.addEventListener('toggle',e=>{if(e.target.matches('details.chapter')&&e.target.open&&window.matchMedia('(max-width:900px)').matches){document.querySelectorAll('details.chapter[open]').forEach(d=>{if(d!==e.target)d.open=false;});}},true);
+document.addEventListener('toggle',e=>{if(e.target.matches('details.chapter')&&e.target.open&&window.matchMedia('(max-width:900px)').matches){const parent=e.target.parentElement;const cls=e.target.classList.contains('subjectGroup')?'subjectGroup':(e.target.classList.contains('innerChapter')?'innerChapter':'chapter');parent.querySelectorAll(':scope > details.'+cls+'[open]').forEach(d=>{if(d!==e.target)d.open=false;});}},true);
 
 document.querySelectorAll('.tab').forEach(t=>t.classList.toggle('active',t.dataset.view===state.view));document.querySelectorAll('#mobileStickyNav button').forEach(b=>b.classList.toggle('active',b.dataset.view===state.view));if(state.view==='map')renderMap();if(state.view==='quests')renderQuests();if(state.view==='new')renderNew();if(state.view==='mock')renderMock();if(state.view==='practice')renderPractice();if(state.view==='review')renderReview();if(state.view==='notes')renderNotes();}
 load();
@@ -464,11 +510,16 @@ document.querySelectorAll('.tab').forEach(t=>t.onclick=()=>{state.view=t.dataset
 document.querySelectorAll('#mobileStickyNav button').forEach(b=>b.onclick=()=>{state.view=b.dataset.view;save();render();window.scrollTo({top:0,behavior:'smooth'});});
 document.getElementById('search').oninput=()=>{state.view='quests';render();};
 document.getElementById('filter').onchange=()=>{const f=document.getElementById('filter').value;state.view=f==='new'?'new':(f==='due'?'review':'quests');render();};
-function backupPayload(){return {app:'ECE Board Review 2026 Quest Map',version:'2026-motivation-v3',exportedAt:new Date().toISOString(),state:{...state}};}
+function backupPayload(){return {app:'ECE Board Review 2026 Quest Map',version:'2026-mobile-logbook-v4',exportedAt:new Date().toISOString(),state:{...state}};}
 function setBackupStatus(msg){const el=document.getElementById('backupStatus');if(el)el.textContent=msg;}
-document.getElementById('exportBtn').onclick=()=>{const payload=backupPayload();let blob=new Blob([JSON.stringify(payload,null,2)],{type:'application/json'});let a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='ece_board_review_progress_backup_'+new Date().toISOString().slice(0,10)+'.json';a.click();URL.revokeObjectURL(a.href);setBackupStatus('Backup exported. Keep the JSON file somewhere safe.');};
-document.getElementById('importFile').onchange=e=>{let file=e.target.files[0];if(!file)return;let r=new FileReader();r.onload=()=>{try{const incoming=JSON.parse(r.result);const importedState=incoming.state?incoming.state:incoming;state={...state,...importedState,done:{...(state.done||{}),...(importedState.done||{})},completedAt:{...(state.completedAt||{}),...(importedState.completedAt||{})},lastReviewed:{...(state.lastReviewed||{}),...(importedState.lastReviewed||{})},reviewCount:{...(state.reviewCount||{}),...(importedState.reviewCount||{})},weak:{...(state.weak||{}),...(importedState.weak||{})},practiceDone:{...(state.practiceDone||{}),...(importedState.practiceDone||{})},topicNotes:{...(state.topicNotes||{}),...(importedState.topicNotes||{})},notes:importedState.notes!==undefined?importedState.notes:(state.notes||'')};save();render();setBackupStatus('Imported.');alert('Progress imported, including topic notes and practice checkboxes.');}catch(err){setBackupStatus('Import failed.');alert('Import failed. This is not a valid progress backup file.');}finally{e.target.value='';}};r.readAsText(file);};
-document.getElementById('resetBtn').onclick=()=>{if(confirm('Reset all progress and weak marks?')){state={done:{},completedAt:{},lastReviewed:{},reviewCount:{},weak:{},practiceDone:{},topicNotes:{},activityDates:{},daily:{},dailyTarget:3,subject:'all',view:'map',notes:''};save();render();}};
+function attachBackupHandlers(){
+ const exportBtn=document.getElementById('exportBtn');
+ const importFile=document.getElementById('importFile');
+ const resetBtn=document.getElementById('resetBtn');
+ if(exportBtn)exportBtn.onclick=()=>{const payload=backupPayload();let blob=new Blob([JSON.stringify(payload,null,2)],{type:'application/json'});let a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='ece_board_review_progress_backup_'+new Date().toISOString().slice(0,10)+'.json';a.click();URL.revokeObjectURL(a.href);setBackupStatus('Exported. Keep the JSON file safe.');};
+ if(importFile)importFile.onchange=e=>{let file=e.target.files[0];if(!file)return;let r=new FileReader();r.onload=()=>{try{const incoming=JSON.parse(r.result);const importedState=incoming.state?incoming.state:incoming;state={...state,...importedState,done:{...(state.done||{}),...(importedState.done||{})},completedAt:{...(state.completedAt||{}),...(importedState.completedAt||{})},lastReviewed:{...(state.lastReviewed||{}),...(importedState.lastReviewed||{})},reviewCount:{...(state.reviewCount||{}),...(importedState.reviewCount||{})},weak:{...(state.weak||{}),...(importedState.weak||{})},practiceDone:{...(state.practiceDone||{}),...(importedState.practiceDone||{})},topicNotes:{...(state.topicNotes||{}),...(importedState.topicNotes||{})},notes:importedState.notes!==undefined?importedState.notes:(state.notes||'')};save();render();state.view='notes';save();render();setBackupStatus('Imported.');alert('Progress imported.');}catch(err){setBackupStatus('Import failed.');alert('Import failed. This is not a valid backup file.');}finally{e.target.value='';}};r.readAsText(file);};
+ if(resetBtn)resetBtn.onclick=()=>{if(confirm('Reset all progress and weak marks?')){state={done:{},completedAt:{},lastReviewed:{},reviewCount:{},weak:{},practiceDone:{},topicNotes:{},activityDates:{},daily:{},dailyTarget:3,subject:'all',view:'map',notes:''};save();render();}};
+}
 render();
 </script>
 </body>
