@@ -60,6 +60,14 @@ table{min-width:560px}th,td{padding:8px;font-size:12px}details.chapter{margin-bo
   .gameHud{grid-template-columns:repeat(3,minmax(0,1fr))}.hudCard strong{font-size:18px}.hudCard span{font-size:10px}.chapterHead h3{font-size:15px}.questTitle{font-size:14px!important}.small{font-size:12px}.badges{gap:4px}.badge,.tag,.pill{font-size:10px;padding:3px 6px}
 }
 
+
+.subjectGroup{border-color:#475569!important;margin-bottom:12px!important}
+.subjectHead h3{font-size:18px!important}
+.innerChapter{margin:8px 0 8px 10px!important}
+.weakList{display:grid;gap:8px;padding:10px}
+.weakItem{display:flex;justify-content:space-between;gap:10px;align-items:flex-start;background:var(--darkPanel);border:1px solid var(--border);border-radius:10px;padding:10px}
+@media(max-width:880px){.innerChapter{margin-left:0!important}.weakItem{display:grid}.subjectHead h3{font-size:16px!important}}
+
 </style>
 </head>
 <body>
@@ -353,7 +361,39 @@ function stats(){let done=quests.filter(q=>state.done[q.id]).length;let xp=quest
 function renderMission(s){const el=document.getElementById('dailyMission');if(!el)return;const target=state.dailyTarget||3;const qDone=s.today.quests||0;const due=quests.filter(q=>state.done[q.id]&&reviewStatus(q.id).due).length;const progress=Math.min(100,(qDone/target)*100);const nextText=due?`${due} review item${due===1?'':'s'} due first`:'next unfinished quest';el.innerHTML=`<div class="missionCard"><h3>Today</h3><div class="missionLine"><span>Quest target</span><b>${qDone}/${target}</b></div><div class="miniBar"><div style="width:${progress}%"></div></div><div class="missionLine"><span>Streak</span><b>${s.streak} day${s.streak===1?'':'s'}</b></div><div class="missionLine"><span>Next action</span><b>${nextText}</b></div><div class="motivationText">${motivationalLine(s)}</div><div class="miniAction"><select id="targetSelect"><option value="1" ${target===1?'selected':''}>Low energy: 1</option><option value="3" ${target===3?'selected':''}>Normal: 3</option><option value="5" ${target===5?'selected':''}>Beast mode: 5</option></select><button class="primary" id="nextActionBtn">Start now</button></div></div>`;const sel=document.getElementById('targetSelect');if(sel)sel.onchange=e=>{state.dailyTarget=parseInt(e.target.value,10);save();render();};const btn=document.getElementById('nextActionBtn');if(btn)btn.onclick=()=>{state.view=due?'review':'quests';save();render();};}
 function renderSidebar(){let s=stats();doneCount.textContent=s.done;totalCount.textContent=s.total;xpCount.textContent=s.xp;levelCount.textContent=s.level;progressBar.style.width=s.pct+'%';renderMission(s);subjectList.innerHTML='';let all=document.createElement('button');all.className='subjectBtn '+(state.subject==='all'?'active':'');all.innerHTML=`<b>All Subjects <span>${s.done}/${s.total}</span></b><div class="small">Level ${s.level}: ${s.levelTitle} • ${s.streak}-day streak</div>`;all.onclick=()=>{state.subject='all';save();render();};subjectList.appendChild(all);subjects.forEach(sub=>{let qs=quests.filter(q=>q.subject===sub.id);let d=qs.filter(q=>state.done[q.id]).length;let b=document.createElement('button');b.className='subjectBtn '+(state.subject===sub.id?'active ':'')+(d===qs.length?'done':'');b.innerHTML=`<b>${sub.title} <span>${d}/${qs.length}</span></b><div class="small">${sub.weight}% • ${sub.priority}</div><div class="bar" style="margin-top:7px"><div style="width:${d/qs.length*100}%"></div></div>`;b.onclick=()=>{state.subject=sub.id;save();render();};subjectList.appendChild(b);});}
 function renderMap(){const el=document.getElementById('view-map');let totalXP=quests.reduce((a,q)=>a+q.xp,0);const s=stats();const mission=`<div class="winCard"><b>Your job today is not to feel motivated.</b> It is to make one small visible win. Finish one quest, tick one practice link, or review one due item. Motivation usually arrives after action, not before it.</div>`;el.innerHTML=mission+`<div class="contentHead"><h2>Content Map First</h2><p class="small">Start here. The subject percentages are official weights; the detailed subtopics are used as a planning guide. New/expanded areas get special treatment, but the classic high-yield foundations still matter.</p></div><div class="mapGrid">${subjects.map(s=>{let qs=quests.filter(q=>q.subject===s.id);let xp=qs.reduce((a,q)=>a+q.xp,0);let nt=qs.filter(q=>q.nt).length;return `<div class="mapCard"><h3>${s.title}</h3><p><b>${s.weight}% official weight</b> • ${qs.length} quests • ${xp} XP</p><p>${s.note}</p><div class="badges" style="margin-top:8px"><span class="badge ${s.weight===30?'bad':'warn'}">${s.priority}</span><span class="badge purple">${nt} New</span></div></div>`}).join('')}</div><div class="callout"><b>Personal strategy because you failed before:</b> do not start by rereading everything. Your first phase should be diagnostic: finish the New audit, then hit Math/Circuits/Comms timed drills. Your risk is not intelligence; it is spreading effort equally across unequal topics.</div><div class="tableWrap"><table><thead><tr><th>Subject</th><th>Official weight</th><th>Quest allocation</th><th>New-threat pressure</th><th>Training instruction</th></tr></thead><tbody>${subjects.map(s=>{let qs=quests.filter(q=>q.subject===s.id);let nt=qs.filter(q=>q.nt).length;return `<tr><td><b>${s.title}</b></td><td>${s.weight}%</td><td>${qs.length} quests</td><td>${nt} flagged items</td><td>${s.note}</td></tr>`}).join('')}</tbody></table></div>`;}
-function renderQuests(){const el=document.getElementById('view-quests');let f=getFiltered();let groups={};f.forEach(q=>{let key=q.subjectTitle+'||'+q.chapter;groups[key]=groups[key]||[];groups[key].push(q);});const keys=Object.keys(groups);el.innerHTML=`<div class="headrow contentHead"><div><h2>Quest List</h2><p class="small">Track progress. Mark weak topics.</p><div class="questNudge">1 question + 1 note.</div><div class="compactTip"><b>Mobile:</b> one lesson at a time.</div></div><div class="badges"><span class="badge good">Core</span><span class="badge bad">New</span><span class="badge purple">Weak</span></div></div>`+keys.map((key,idx)=>{let [st,ch]=key.split('||');let arr=groups[key];let d=arr.filter(q=>state.done[q.id]).length;let hasDue=arr.some(q=>state.done[q.id]&&reviewStatus(q.id).due);let openAttr=(idx===0||hasDue)?' open':'';return `<details class="chapter"${openAttr}><summary class="chapterHead"><div><h3>${ch}</h3><div class="small">${st} • ${d}/${arr.length} done</div></div><div class="badges"><span class="badge">${arr.reduce((a,q)=>a+q.xp,0)} XP</span>${arr.some(q=>q.nt)?'<span class="badge bad">New inside</span>':''}</div></summary><div class="questList">${arr.map(q=>questHTML(q)).join('')}</div></details>`}).join('') || `<div class="callout">No quests match your search/filter.</div>`;bindQuestEvents();}
+function renderQuests(){
+ const el=document.getElementById('view-quests');
+ let f=getFiltered();
+ let bySubject={};
+ f.forEach(q=>{
+   if(!bySubject[q.subject]) bySubject[q.subject]={title:q.subjectTitle,items:[]};
+   bySubject[q.subject].items.push(q);
+ });
+ const subjectKeys=Object.keys(bySubject);
+ const header=`<div class="headrow contentHead"><div><h2>Quest List</h2><p class="small">Grouped by subject. Mark weak topics for repeat review.</p><div class="questNudge">1 question + 1 note.</div><div class="compactTip"><b>Mobile:</b> open one subject, then one chapter.</div></div><div class="badges"><span class="badge good">Core</span><span class="badge bad">New</span><span class="badge purple">Weak</span></div></div>`;
+ if(!subjectKeys.length){el.innerHTML=header+`<div class="callout">No quests match your search/filter.</div>`;return;}
+ el.innerHTML=header+subjectKeys.map((subKey,sidx)=>{
+   const sub=bySubject[subKey];
+   const items=sub.items;
+   const done=items.filter(q=>state.done[q.id]).length;
+   const due=items.filter(q=>state.done[q.id]&&reviewStatus(q.id).due).length;
+   const weak=items.filter(q=>state.weak[q.id]).length;
+   const xp=items.reduce((a,q)=>a+q.xp,0);
+   const openSub=(state.subject===subKey||sidx===0||due>0||weak>0)?' open':'';
+   let chapters={};
+   items.forEach(q=>{chapters[q.chapter]=chapters[q.chapter]||[];chapters[q.chapter].push(q);});
+   const chapterHTML=Object.keys(chapters).map((ch,cidx)=>{
+     const arr=chapters[ch];
+     const cd=arr.filter(q=>state.done[q.id]).length;
+     const hasDue=arr.some(q=>state.done[q.id]&&reviewStatus(q.id).due);
+     const hasWeak=arr.some(q=>state.weak[q.id]);
+     const openCh=(cidx===0||hasDue||hasWeak)?' open':'';
+     return `<details class="chapter innerChapter"${openCh}><summary class="chapterHead"><div><h3>${ch}</h3><div class="small">${cd}/${arr.length} done</div></div><div class="badges"><span class="badge">${arr.reduce((a,q)=>a+q.xp,0)} XP</span>${hasDue?'<span class="badge warn">Due</span>':''}${hasWeak?'<span class="badge purple">Weak</span>':''}${arr.some(q=>q.nt)?'<span class="badge bad">New</span>':''}</div></summary><div class="questList">${arr.map(q=>questHTML(q)).join('')}</div></details>`;
+   }).join('');
+   return `<details class="chapter subjectGroup"${openSub}><summary class="chapterHead subjectHead"><div><h3>${sub.title}</h3><div class="small">${done}/${items.length} done • ${xp} XP</div></div><div class="badges">${due?`<span class="badge warn">${due} due</span>`:''}${weak?`<span class="badge purple">${weak} weak</span>`:''}</div></summary>${chapterHTML}</details>`;
+ }).join('');
+ bindQuestEvents();
+}
 function questHTML(q){const prob=calculationProblemHTML(q);const deliverable=prob?'Chapter: '+q.chapter+'. Review-only task: solve the embedded question first, then explain the method and write one mistake you must not repeat.':'Chapter: '+q.chapter+'. Review-only task: explain the concept, recall the key rule, and write one mistake you must not repeat.';const chips=`${q.nt?'<span class="badge bad">New</span>':''}${q.core?'<span class="badge good">Core</span>':''}${prob?'<span class="badge">1 Problem</span>':''}${state.weak[q.id]?'<span class="badge purple">Weak</span>':''}`;return `<div class="quest ${state.done[q.id]?'done':''}" data-id="${q.id}"><input type="checkbox" class="doneBox" ${state.done[q.id]?'checked':''}/><div><div class="questTop"><div class="questTitle">${q.item}</div><div class="mobileQuick">+${q.xp} XP</div></div><div class="questMeta">${chips}</div><details class="lessonDrawer"><summary>Details</summary><div class="lessonContent"><div class="questText">${deliverable}</div><div class="questMeta"><button class="secondary weakBtn" style="padding:4px 8px;font-size:11px">${state.weak[q.id]?'Not weak':'Weak'}</button></div>${prob}${reviewInfoHTML(q)}${practiceLinkHTML(q)}${topicNotesHTML(q)}</div></details></div><div class="xp">+${q.xp} XP</div></div>`;}
 function bindQuestEvents(){
  document.querySelectorAll('.quest[data-id]').forEach(row=>{
@@ -398,7 +438,22 @@ function renderReview(){
  bindQuestEvents();
 }
 
-function renderNotes(){const el=document.getElementById('view-notes');el.innerHTML=`<div class="contentHead"><h2>Review Notes and Mistake Log</h2><p class="small">Use this for global mistakes. Each quest also has its own topic notes box now. Export progress often.</p></div><textarea id="notesBox" class="notes" placeholder="Mistake log, formulas, weak topics, review center reminders...">${state.notes||''}</textarea><div style="margin-top:10px"><button class="primary" id="saveNotes">Save Notes</button></div>`;document.getElementById('saveNotes').onclick=()=>{state.notes=document.getElementById('notesBox').value;save();alert('Notes saved.');};}
+function weakTopicsHTML(){
+ const weakQs=quests.filter(q=>state.weak[q.id]);
+ if(!weakQs.length) return `<div class="callout"><b>Weak topics:</b> none marked yet. Use the Weak button inside any quest.</div>`;
+ let by={};
+ weakQs.forEach(q=>{by[q.subjectTitle]=by[q.subjectTitle]||[];by[q.subjectTitle].push(q);});
+ return `<div class="callout"><b>Weak topics</b><div class="small">Use this as your comeback list. Open one, review, then unmark when it feels stable.</div></div>`+
+ Object.keys(by).map(sub=>`<details class="chapter" open><summary class="chapterHead"><div><h3>${sub}</h3><div class="small">${by[sub].length} weak topic${by[sub].length===1?'':'s'}</div></div><span class="badge purple">Weak</span></summary><div class="weakList">`+
+ by[sub].map(q=>`<div class="weakItem"><div><b>${q.item}</b><div class="small">${q.chapter}${state.topicNotes?.[q.id]?` • Note: ${escapeHTML(state.topicNotes[q.id]).slice(0,120)}${state.topicNotes[q.id].length>120?'...':''}`:''}</div></div><button class="secondary openWeakBtn" data-id="${q.id}" style="padding:6px 9px;font-size:12px">Open</button></div>`).join('')+
+ `</div></details>`).join('');
+}
+function renderNotes(){
+ const el=document.getElementById('view-notes');
+ el.innerHTML=`<div class="contentHead"><h2>Notes</h2><p class="small">Global mistake log plus weak-topic shortcut list.</p></div>${weakTopicsHTML()}<textarea id="notesBox" class="notes" placeholder="Mistake log, formulas, weak topics, review reminders...">${state.notes||''}</textarea><div style="margin-top:10px"><button class="primary" id="saveNotes">Save Notes</button></div>`;
+ document.getElementById('saveNotes').onclick=()=>{state.notes=document.getElementById('notesBox').value;save();alert('Notes saved.');};
+ document.querySelectorAll('.openWeakBtn').forEach(btn=>btn.onclick=()=>{const q=quests.find(x=>x.id===btn.dataset.id);if(!q)return;state.subject=q.subject;state.filter='weak';state.view='quests';save();render();});
+}
 function render(){renderSidebar();document.querySelectorAll('section[id^="view-"]').forEach(x=>x.classList.add('hidden'));document.getElementById('view-'+state.view).classList.remove('hidden');
 document.addEventListener('toggle',e=>{if(e.target.matches('.lessonDrawer')&&e.target.open){document.querySelectorAll('.lessonDrawer[open]').forEach(d=>{if(d!==e.target)d.open=false;});}},true);
 document.addEventListener('toggle',e=>{if(e.target.matches('details.chapter')&&e.target.open&&window.matchMedia('(max-width:900px)').matches){document.querySelectorAll('details.chapter[open]').forEach(d=>{if(d!==e.target)d.open=false;});}},true);
