@@ -340,6 +340,33 @@ h1,h2,h3,.eyebrow,.tab,.subjectHead h3,.chapterHead h3{font-family:Georgia,"Time
   }
 }
 
+
+/* spell burst */
+.spell-wrap{position:fixed;inset:0;pointer-events:none;overflow:hidden;z-index:9999}
+.spell-ring{position:fixed;width:18px;height:18px;border-radius:999px;border:2px solid rgba(247,215,118,.95);box-shadow:0 0 14px rgba(247,215,118,.55),0 0 28px rgba(195,166,255,.35);transform:translate(-50%,-50%) scale(.2);animation:spellRing 800ms ease-out forwards}
+.spell-spark{position:fixed;width:8px;height:8px;border-radius:999px;background:radial-gradient(circle,#fff7d6 0%,var(--spark,#f7d776) 58%,rgba(255,255,255,0) 72%);box-shadow:0 0 10px var(--spark,#f7d776),0 0 18px rgba(255,255,255,.35);transform:translate(-50%,-50%);animation:spellSpark 1100ms cubic-bezier(.2,.7,.1,1) forwards}
+.spell-flash{position:fixed;width:52px;height:52px;border-radius:999px;background:radial-gradient(circle,rgba(255,245,200,.9) 0%,rgba(247,215,118,.5) 32%,rgba(195,166,255,.18) 56%,rgba(255,255,255,0) 72%);transform:translate(-50%,-50%);filter:blur(1px);animation:spellFlash 520ms ease-out forwards}
+.spell-text{position:fixed;transform:translate(-50%,-50%);color:#fff4d2;font-family:Georgia,"Times New Roman",serif;font-weight:700;letter-spacing:.08em;text-transform:uppercase;text-shadow:0 0 10px rgba(247,215,118,.68),0 0 26px rgba(195,166,255,.45),0 2px 8px rgba(0,0,0,.45);white-space:nowrap;animation:spellTextRise 1400ms ease-out forwards}
+@keyframes spellRing{
+  0%{opacity:.95;transform:translate(-50%,-50%) scale(.2)}
+  70%{opacity:.55}
+  100%{opacity:0;transform:translate(-50%,-50%) scale(9)}
+}
+@keyframes spellSpark{
+  0%{opacity:1;transform:translate(-50%,-50%) scale(.6)}
+  100%{opacity:0;transform:translate(calc(-50% + var(--dx)),calc(-50% + var(--dy))) scale(.1)}
+}
+@keyframes spellFlash{
+  0%{opacity:.95;transform:translate(-50%,-50%) scale(.3)}
+  100%{opacity:0;transform:translate(-50%,-50%) scale(2.8)}
+}
+@keyframes spellTextRise{
+  0%{opacity:0;transform:translate(-50%,-42%) scale(.82)}
+  12%{opacity:1}
+  75%{opacity:1}
+  100%{opacity:0;transform:translate(-50%,-128%) scale(1.06)}
+}
+
 </style>
 </head>
 <body>
@@ -622,6 +649,57 @@ function recordActivity(kind){const k=dayKey();state.activityDates=state.activit
 function currentStreak(){const dates=state.activityDates||{};let streak=0;let d=new Date();while(dates[dayKey(d)]){streak++;d.setDate(d.getDate()-1);}return streak;}
 function levelTitle(level){if(level<3)return 'Cadet';if(level<6)return 'Circuit Hunter';if(level<10)return 'Signal Ranger';if(level<15)return 'Board Slayer';return 'ECE Final Boss';}
 function showToast(msg){let t=document.getElementById('toast');if(!t){t=document.createElement('div');t.id='toast';t.className='toast';document.body.appendChild(t);}t.innerHTML=msg;t.classList.add('show');clearTimeout(showToast._timer);showToast._timer=setTimeout(()=>t.classList.remove('show'),3200);}
+function castBombardaMaxima(originEl){
+  const wrap=document.createElement('div');
+  wrap.className='spell-wrap';
+  document.body.appendChild(wrap);
+  const rect=originEl&&originEl.getBoundingClientRect?originEl.getBoundingClientRect():{left:window.innerWidth/2,top:window.innerHeight/2,width:0,height:0};
+  const x=rect.left+rect.width/2;
+  const y=Math.max(80, rect.top + Math.min(rect.height*0.5, 48));
+  const colors=['#f7d776','#c3a6ff','#74c69d','#f28482','#7dd3fc','#ffffff'];
+
+  const flash=document.createElement('span');
+  flash.className='spell-flash';
+  flash.style.left=x+'px';
+  flash.style.top=y+'px';
+  wrap.appendChild(flash);
+
+  const ring=document.createElement('span');
+  ring.className='spell-ring';
+  ring.style.left=x+'px';
+  ring.style.top=y+'px';
+  wrap.appendChild(ring);
+
+  const text=document.createElement('div');
+  text.className='spell-text';
+  text.textContent='Bombarda Maxima!';
+  text.style.left=x+'px';
+  text.style.top=(y-12)+'px';
+  text.style.fontSize=(window.innerWidth<700?'18px':'22px');
+  wrap.appendChild(text);
+
+  for(let i=0;i<30;i++){
+    const spark=document.createElement('span');
+    spark.className='spell-spark';
+    const angle=(Math.PI*2*i/30)+(Math.random()*0.32-0.16);
+    const radius=80+Math.random()*140;
+    const dx=(Math.cos(angle)*radius).toFixed(0)+'px';
+    const dy=(Math.sin(angle)*radius).toFixed(0)+'px';
+    const delay=(Math.random()*130).toFixed(0)+'ms';
+    const size=5+Math.random()*8;
+    spark.style.left=x+'px';
+    spark.style.top=y+'px';
+    spark.style.width=size+'px';
+    spark.style.height=size+'px';
+    spark.style.setProperty('--dx',dx);
+    spark.style.setProperty('--dy',dy);
+    spark.style.setProperty('--spark',colors[Math.floor(Math.random()*colors.length)]);
+    spark.style.animationDelay=delay;
+    wrap.appendChild(spark);
+  }
+  setTimeout(()=>wrap.remove(),1600);
+}
+
 function motivationalLine(s){if(s.done===0)return 'Start tiny: one quest is enough to break the resistance.';if((state.daily?.[dayKey()]?.quests||0)>=(state.dailyTarget||3))return 'Daily target hit. Anything after this is bonus XP.';if(s.pct<10)return 'Early phase is supposed to feel slow. Build the habit first.';if(s.pct<40)return 'You are no longer starting. Protect the streak.';if(s.pct<75)return 'This is the grind zone. Weak topics are where points are hiding.';return 'Finish line mode: review due items and mock pressure matter most.';}
 function addDays(d,n){let x=new Date(d);x.setDate(x.getDate()+n);return x;}
 const REVIEW_INTERVALS=[1,3,7,14,30,60];
@@ -690,7 +768,7 @@ function bindQuestEvents(){
    let id=row.dataset.id;
    const done=row.querySelector('.doneBox');
    const weak=row.querySelector('.weakBtn');
-   if(done) done.onchange=e=>{state.completedAt=state.completedAt||{};state.lastReviewed=state.lastReviewed||{};state.reviewCount=state.reviewCount||{};state.done[id]=e.target.checked;if(e.target.checked){if(!state.completedAt[id])state.completedAt[id]=todayISO();recordActivity('quests');const s=stats();const qToday=state.daily?.[dayKey()]?.quests||0;if(qToday===(state.dailyTarget||3))showToast('🎯 Daily target complete. Stop here guilt-free or keep farming XP.');else if(s.done%10===0)showToast('🔥 '+s.done+' quests done. You are stacking proof.');else showToast('✅ Quest finished. Small win logged.');}else{delete state.done[id];delete state.completedAt[id];delete state.lastReviewed[id];delete state.reviewCount[id];}save();render();};
+   if(done) done.onchange=e=>{state.completedAt=state.completedAt||{};state.lastReviewed=state.lastReviewed||{};state.reviewCount=state.reviewCount||{};state.done[id]=e.target.checked;if(e.target.checked){if(!state.completedAt[id])state.completedAt[id]=todayISO();recordActivity('quests');castBombardaMaxima(row);const s=stats();const qToday=state.daily?.[dayKey()]?.quests||0;if(qToday===(state.dailyTarget||3))showToast('🎉 Daily target complete. Stop here guilt-free or keep farming XP.');else if(s.done%10===0)showToast('🔥 '+s.done+' quests done. You are stacking proof.');else showToast('✨ Quest finished. Small win logged.');}else{delete state.done[id];delete state.completedAt[id];delete state.lastReviewed[id];delete state.reviewCount[id];}save();setTimeout(()=>render(),120);};
    const review=row.querySelector('.reviewBtn');
    if(review) review.onclick=()=>{state.lastReviewed=state.lastReviewed||{};state.reviewCount=state.reviewCount||{};state.lastReviewed[id]=todayISO();state.reviewCount[id]=(state.reviewCount[id]||0)+1;recordActivity('reviews');save();showToast('🧠 Reviewed. This is how memory gets stronger.');render();};
    if(weak) weak.onclick=()=>{state.weak[id]=!state.weak[id];if(!state.weak[id])delete state.weak[id];save();render();};
@@ -1009,7 +1087,7 @@ render();
           <div class="subjectMiniBoss ${st.bossDone?'bossDone':''}">
             <div class="small"><b>Boss:</b> ${meta.boss}</div>
             <div class="houseBtnNote">${st.done===st.total ? (st.bossDone?'✅ Defeated':'Unlocked now') : `Unlock at ${st.total}/${st.total} cleared`}</div>
-            <button class="secondary bossButton" onclick="toggleBossBattle('${s.id}')">${st.bossDone?'Reset boss':'${st.done===st.total ? "Defeat boss" : "Locked"}'}</button>
+            <button class="secondary bossButton" onclick="toggleBossBattle('${s.id}')">${st.bossDone?'Reset boss':(st.done===st.total ? 'Defeat boss' : 'Locked')}</button>
           </div>`);
       } else {
         const wrap = card.querySelector('.subjectMiniBoss');
