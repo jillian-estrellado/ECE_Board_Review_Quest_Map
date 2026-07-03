@@ -142,6 +142,10 @@ table{min-width:560px}th,td{padding:8px;font-size:12px}details.chapter{margin-bo
   }
 }
 
+
+.videoPanel{border-color:rgba(248,113,113,.25)!important}
+.videoPanel .practiceTitle{color:#fecaca}
+
 </style>
 </head>
 <body>
@@ -206,7 +210,7 @@ const pinoyResources=[
  {group:'Mathematics',title:'Differential Calculus — Maxima/Minima and Time Rates',url:'https://pinoybix.org/2015/08/mcqs-in-differential-calculus-maxima-minima-time-rates-part1.html',match:['differential calculus','maxima','minima','time rates','related rates']},
  {group:'Mathematics',title:'Integral Calculus',url:'https://pinoybix.org/2015/08/mcqs-in-integral-calculus-part1.html',match:['integral calculus','integration','area','volume by integration']},
  {group:'Mathematics',title:'Differential Equations',url:'https://pinoybix.org/2015/08/mcqs-in-differential-equations-part1.html',match:['differential equations','ode','laplace']},
- {group:'Mathematics',title:'Advanced Engineering Math',url:'https://pinoybix.org/2015/08/mcqs-in-advanced-engineering-math-part1.html',match:['advanced engineering math','complex numbers','fourier','pde','numerical methods','vector analysis','matrices','z-transform','convolution','signals']},
+ {group:'Mathematics',title:'Advanced Engineering Math',url:'https://pinoybix.org/2015/08/mcqs-in-advanced-engineering-math-part1.html',match:['advanced engineering math','complex numbers','fourier','pde','partial differential equations','numerical methods','vector analysis','matrices','power series','bessel','legendre']},
  {group:'Electronics Engineering',title:'Electrical Circuit MCQ Series',url:'https://pinoybix.org/2018/05/mcq-in-electrical-circuit-series.html',match:['dc circuits','ac circuits','electrical circuit','network theorems','resistors','capacitors','inductors','transient','rlc','power factor','phasor']},
  {group:'Electronics Engineering',title:'Electronic Circuits / Analysis / Design Series',url:'https://pinoybix.org/2018/05/mcq-in-electronic-circuits-series.html',match:['electronic circuits','diode','bjt','fet','mosfet','amplifier','oscillator','filter','op-amp','rectifier','biasing']},
  {group:'Electronics Engineering',title:'Control Systems MCQ',url:'https://pinoybix.org/2022/08/mcq-in-control-systems-part-1-engineering-board-exam.html',match:['control systems','feedback','stability','root locus','transfer function','block diagram','signal flow']},
@@ -231,7 +235,12 @@ function practiceMatches(q){
  const hay=normText(q.subjectTitle+' '+q.chapter+' '+q.item);
  let links=[];
  pinoyResources.forEach(r=>{
-   const hit=(r.match||[]).some(m=>hay.includes(normText(m)));
+   const groupOk = (r.group==='Mathematics' && q.subject==='math') ||
+                   (r.group==='Electronics Engineering' && q.subject==='ee') ||
+                   (r.group==='GEAS' && q.subject==='geas') ||
+                   (r.group==='EST / Communications' && q.subject==='est') ||
+                   (!['Mathematics','Electronics Engineering','GEAS','EST / Communications'].includes(r.group));
+   const hit=groupOk && (r.match||[]).some(m=>hay.includes(normText(m)));
    if(hit && !links.some(x=>x.url===r.url))links.push(r);
  });
  return links.slice(0,3);
@@ -240,6 +249,16 @@ function practiceLinkHTML(q){
  const arr=practiceMatches(q);
  if(!arr.length){return `<div class="noPractice">No exact PinoyBIX practice page confirmed for this exact topic yet. Use your review-center notes/question bank for this one.</div>`;}
  return `<div class="practicePanel"><div class="practiceTitle">Exact PinoyBIX practice for this topic</div>${arr.map(r=>{const rid=resourceId(r);return `<label class="practiceItem"><input type="checkbox" class="practiceDone" data-rid="${rid}" ${state.practiceDone&&state.practiceDone[rid]?'checked':''}/><span><a class="practiceLink" href="${r.url}" target="_blank" rel="noopener">${r.title}</a></span></label>`;}).join('')}</div>`;
+}
+function videoQuery(q){
+ let base=(q.subjectTitle+' '+q.chapter+' '+q.item).replace(/\s+/g,' ').trim();
+ return base+' ECE board exam tutorial';
+}
+function videoId(q){return 'vid_'+q.id;}
+function videoRefresherHTML(q){
+ const vid=videoId(q);
+ const url='https://www.youtube.com/results?search_query='+encodeURIComponent(videoQuery(q));
+ return `<div class="practicePanel videoPanel"><div class="practiceTitle">🎥 Video refresher</div><label class="practiceItem"><input type="checkbox" class="videoDone" data-vid="${vid}" ${state.videoDone&&state.videoDone[vid]?'checked':''}/><span><a class="practiceLink" href="${url}" target="_blank" rel="noopener">Open tutorial search</a><span class="small"> — watch one short refresher, then solve the quest problem.</span></span></label></div>`;
 }
 function topicNotesHTML(q){
  const val=((state.topicNotes&&state.topicNotes[q.id])||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
@@ -399,7 +418,7 @@ const subjects=[
 ];
 const newThreatKeywords=['Building Management','HVAC','Security','Safety','Surveillance','Audio-Video','Lighting','Technopreneurship','Customers','Value Proposition','Market','Competitive','Business Models','Intellectual Property','Business Plan','Accounting','Raising Capital','Social Responsibility','Globalization','Engineering Management','Marketing','Finance Function','Product and Service Operations','Object-Oriented','UML','Exception Handling','Graphical User Interface','Environmental','Sustainable','Impact Assessment','CAD','Snapping','Plotting','Image input','Materials Science','Composites','Dielectric','Optical','Thermal','Microcontroller','Memory Subsystem','I/O Subsystem','Instruction Set','Assembly','Cryptography','SCADA','Fire and Life Safety'];
 const coreKeywords=['Calculus','Circuits','Network','BJT','FET','Diode','Amplifier','Modulation','Transmission','Antenna','Signals','Z-transforms','Fourier','Laplace','Control','Maxwell','Boolean','Logic','Physics','Economics'];
-let state={done:{},completedAt:{},lastReviewed:{},reviewCount:{},weak:{},practiceDone:{},topicNotes:{},activityDates:{},daily:{},dailyTarget:3,subject:'all',view:'map',notes:''};
+let state={done:{},completedAt:{},lastReviewed:{},reviewCount:{},weak:{},practiceDone:{},videoDone:{},topicNotes:{},activityDates:{},daily:{},dailyTarget:3,subject:'all',view:'map',notes:''};
 function load(){try{state={...state,...JSON.parse(localStorage.getItem(STORAGE_KEY)||'{}')}}catch(e){}}
 function save(){localStorage.setItem(STORAGE_KEY,JSON.stringify(state));}
 function todayISO(){return new Date().toISOString();}
@@ -471,7 +490,7 @@ function renderQuests(){
  }).join('');
  bindQuestEvents();
 }
-function questHTML(q){const prob=calculationProblemHTML(q);const deliverable=prob?'Chapter: '+q.chapter+'. Review-only task: solve the embedded question first, then explain the method and write one mistake you must not repeat.':'Chapter: '+q.chapter+'. Review-only task: explain the concept, recall the key rule, and write one mistake you must not repeat.';const chips=`${q.nt?'<span class="badge bad">New</span>':''}${q.core?'<span class="badge good">Core</span>':''}${prob?'<span class="badge">1 Problem</span>':''}${state.weak[q.id]?'<span class="badge purple">Weak</span>':''}`;return `<div class="quest ${state.done[q.id]?'done':''}" data-id="${q.id}"><input type="checkbox" class="doneBox" ${state.done[q.id]?'checked':''}/><div><div class="questTop"><div class="questTitle">${q.item}</div><div class="mobileQuick">+${q.xp} XP</div></div><div class="questMeta">${chips}</div><details class="lessonDrawer"><summary>Details</summary><div class="lessonContent"><div class="questText">${deliverable}</div><div class="questMeta"><button class="secondary weakBtn" style="padding:4px 8px;font-size:11px">${state.weak[q.id]?'Not weak':'Weak'}</button></div>${prob}${reviewInfoHTML(q)}${practiceLinkHTML(q)}${topicNotesHTML(q)}</div></details></div><div class="xp">+${q.xp} XP</div></div>`;}
+function questHTML(q){const prob=calculationProblemHTML(q);const deliverable=prob?'Chapter: '+q.chapter+'. Review-only task: solve the embedded question first, then explain the method and write one mistake you must not repeat.':'Chapter: '+q.chapter+'. Review-only task: explain the concept, recall the key rule, and write one mistake you must not repeat.';const chips=`${q.nt?'<span class="badge bad">New</span>':''}${q.core?'<span class="badge good">Core</span>':''}${prob?'<span class="badge">1 Problem</span>':''}${state.weak[q.id]?'<span class="badge purple">Weak</span>':''}`;return `<div class="quest ${state.done[q.id]?'done':''}" data-id="${q.id}"><input type="checkbox" class="doneBox" ${state.done[q.id]?'checked':''}/><div><div class="questTop"><div class="questTitle">${q.item}</div><div class="mobileQuick">+${q.xp} XP</div></div><div class="questMeta">${chips}</div><details class="lessonDrawer"><summary>Details</summary><div class="lessonContent"><div class="questText">${deliverable}</div><div class="questMeta"><button class="secondary weakBtn" style="padding:4px 8px;font-size:11px">${state.weak[q.id]?'Not weak':'Weak'}</button></div>${prob}${reviewInfoHTML(q)}${videoRefresherHTML(q)}${practiceLinkHTML(q)}${topicNotesHTML(q)}</div></details></div><div class="xp">+${q.xp} XP</div></div>`;}
 function bindQuestEvents(){
  document.querySelectorAll('.quest[data-id]').forEach(row=>{
    let id=row.dataset.id;
@@ -484,6 +503,9 @@ function bindQuestEvents(){
  });
  document.querySelectorAll('.practiceDone').forEach(cb=>{
    cb.onchange=e=>{state.practiceDone=state.practiceDone||{};state.practiceDone[e.target.dataset.rid]=e.target.checked;if(e.target.checked){recordActivity('practice');showToast('📝 Practice page finished. Good, this is real review.');}else delete state.practiceDone[e.target.dataset.rid];save();renderSidebar();};
+ });
+ document.querySelectorAll('.videoDone').forEach(cb=>{
+   cb.onchange=e=>{state.videoDone=state.videoDone||{};state.videoDone[e.target.dataset.vid]=e.target.checked;if(e.target.checked){recordActivity('practice');showToast('🎥 Refresher watched. Now solve something.');}else delete state.videoDone[e.target.dataset.vid];save();renderSidebar();};
  });
  document.querySelectorAll('.topicNoteBox').forEach(tb=>{
    tb.oninput=e=>{state.topicNotes=state.topicNotes||{};state.topicNotes[e.target.dataset.id]=e.target.value;save();};
@@ -527,7 +549,7 @@ function weakTopicsHTML(){
 }
 function renderNotes(){
  const el=document.getElementById('view-notes');
- const backupBox=`<div class="card backupCard"><h3>💾 Backup & Transfer</h3><p class="small">Use this before changing browser, phone, or file location.</p><div class="two"><button class="secondary" id="exportBtn">⬇️ Export</button><label class="secondary" style="text-align:center;cursor:pointer">⬆️ Import<input type="file" id="importFile" class="hidden" accept="application/json" /></label></div><div id="backupStatus" class="small" style="min-height:18px;margin-top:6px"></div><button class="danger" id="resetBtn" style="margin-top:8px">🧹 Reset Progress</button></div>`;
+ const backupBox=`<div class="card backupCard"><h3>💾 Backup & Transfer</h3><p class="small">Use this before changing browser, phone, or file location. Includes video checkboxes.</p><div class="two"><button class="secondary" id="exportBtn">⬇️ Export</button><label class="secondary" style="text-align:center;cursor:pointer">⬆️ Import<input type="file" id="importFile" class="hidden" accept="application/json" /></label></div><div id="backupStatus" class="small" style="min-height:18px;margin-top:6px"></div><button class="danger" id="resetBtn" style="margin-top:8px">🧹 Reset Progress</button></div>`;
  el.innerHTML=`<div class="contentHead"><h2>📓 Logbook</h2><p class="small">Weak topics, mistake log, and backup tools.</p></div>${backupBox}${weakTopicsHTML()}<textarea id="notesBox" class="notes" placeholder="Mistake log, formulas, weak topics, review reminders...">${state.notes||''}</textarea><div style="margin-top:10px"><button class="primary" id="saveNotes">Save Logbook</button></div>`;
  document.getElementById('saveNotes').onclick=()=>{state.notes=document.getElementById('notesBox').value;save();alert('Logbook saved.');};
  document.querySelectorAll('.openWeakBtn').forEach(btn=>btn.onclick=()=>{const q=quests.find(x=>x.id===btn.dataset.id);if(!q)return;state.subject=q.subject;state.filter='weak';state.view='quests';save();render();});
@@ -543,15 +565,15 @@ document.querySelectorAll('.tab').forEach(t=>t.onclick=()=>{state.view=t.dataset
 document.querySelectorAll('#mobileStickyNav button').forEach(b=>b.onclick=()=>{state.view=b.dataset.view;save();render();window.scrollTo({top:0,behavior:'smooth'});});
 document.getElementById('search').oninput=()=>{state.view='quests';render();};
 document.getElementById('filter').onchange=()=>{const f=document.getElementById('filter').value;state.view=f==='new'?'new':(f==='due'?'review':'quests');render();};
-function backupPayload(){return {app:'ECE Board Review 2026 Quest Map',version:'2026-mobile-logbook-v4',exportedAt:new Date().toISOString(),state:{...state}};}
+function backupPayload(){return {app:'ECE Board Review 2026 Quest Map',version:'2026-video-refresher-v5',exportedAt:new Date().toISOString(),state:{...state}};}
 function setBackupStatus(msg){const el=document.getElementById('backupStatus');if(el)el.textContent=msg;}
 function attachBackupHandlers(){
  const exportBtn=document.getElementById('exportBtn');
  const importFile=document.getElementById('importFile');
  const resetBtn=document.getElementById('resetBtn');
  if(exportBtn)exportBtn.onclick=()=>{const payload=backupPayload();let blob=new Blob([JSON.stringify(payload,null,2)],{type:'application/json'});let a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='ece_board_review_progress_backup_'+new Date().toISOString().slice(0,10)+'.json';a.click();URL.revokeObjectURL(a.href);setBackupStatus('Exported. Keep the JSON file safe.');};
- if(importFile)importFile.onchange=e=>{let file=e.target.files[0];if(!file)return;let r=new FileReader();r.onload=()=>{try{const incoming=JSON.parse(r.result);const importedState=incoming.state?incoming.state:incoming;state={...state,...importedState,done:{...(state.done||{}),...(importedState.done||{})},completedAt:{...(state.completedAt||{}),...(importedState.completedAt||{})},lastReviewed:{...(state.lastReviewed||{}),...(importedState.lastReviewed||{})},reviewCount:{...(state.reviewCount||{}),...(importedState.reviewCount||{})},weak:{...(state.weak||{}),...(importedState.weak||{})},practiceDone:{...(state.practiceDone||{}),...(importedState.practiceDone||{})},topicNotes:{...(state.topicNotes||{}),...(importedState.topicNotes||{})},notes:importedState.notes!==undefined?importedState.notes:(state.notes||'')};save();render();state.view='notes';save();render();setBackupStatus('Imported.');alert('Progress imported.');}catch(err){setBackupStatus('Import failed.');alert('Import failed. This is not a valid backup file.');}finally{e.target.value='';}};r.readAsText(file);};
- if(resetBtn)resetBtn.onclick=()=>{if(confirm('Reset all progress and weak marks?')){state={done:{},completedAt:{},lastReviewed:{},reviewCount:{},weak:{},practiceDone:{},topicNotes:{},activityDates:{},daily:{},dailyTarget:3,subject:'all',view:'map',notes:''};save();render();}};
+ if(importFile)importFile.onchange=e=>{let file=e.target.files[0];if(!file)return;let r=new FileReader();r.onload=()=>{try{const incoming=JSON.parse(r.result);const importedState=incoming.state?incoming.state:incoming;state={...state,...importedState,done:{...(state.done||{}),...(importedState.done||{})},completedAt:{...(state.completedAt||{}),...(importedState.completedAt||{})},lastReviewed:{...(state.lastReviewed||{}),...(importedState.lastReviewed||{})},reviewCount:{...(state.reviewCount||{}),...(importedState.reviewCount||{})},weak:{...(state.weak||{}),...(importedState.weak||{})},practiceDone:{...(state.practiceDone||{}),...(importedState.practiceDone||{})},videoDone:{...(state.videoDone||{}),...(importedState.videoDone||{})},topicNotes:{...(state.topicNotes||{}),...(importedState.topicNotes||{})},notes:importedState.notes!==undefined?importedState.notes:(state.notes||'')};save();render();state.view='notes';save();render();setBackupStatus('Imported.');alert('Progress imported.');}catch(err){setBackupStatus('Import failed.');alert('Import failed. This is not a valid backup file.');}finally{e.target.value='';}};r.readAsText(file);};
+ if(resetBtn)resetBtn.onclick=()=>{if(confirm('Reset all progress and weak marks?')){state={done:{},completedAt:{},lastReviewed:{},reviewCount:{},weak:{},practiceDone:{},videoDone:{},topicNotes:{},activityDates:{},daily:{},dailyTarget:3,subject:'all',view:'map',notes:''};save();render();}};
 }
 render();
 </script>
