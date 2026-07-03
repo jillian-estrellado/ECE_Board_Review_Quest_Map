@@ -283,6 +283,63 @@ h1,h2,h3,.eyebrow,.tab,.subjectHead h3,.chapterHead h3{font-family:Georgia,"Time
   .mobileStickyNav button{font-size:10px!important}
 }
 
+
+/* Mobile cleanup: game extras only on Map, compact header everywhere */
+@media(max-width:900px){
+  .hero{
+    padding:7px 9px!important;
+    margin-bottom:6px!important;
+    border-radius:12px!important;
+  }
+  .hero h1{
+    font-size:17px!important;
+    line-height:1.05!important;
+  }
+  .hero .eyebrow{
+    font-size:9px!important;
+    letter-spacing:.06em!important;
+  }
+  .hero .subtitle{
+    display:none!important;
+  }
+  .sidebar{
+    padding:8px!important;
+  }
+  .hud{
+    gap:3px!important;
+  }
+  .hud .box{
+    padding:4px 3px!important;
+    border-radius:8px!important;
+  }
+  .hud strong{
+    font-size:14px!important;
+  }
+  .hud span{
+    font-size:8px!important;
+  }
+  .missionCard{
+    padding:7px!important;
+    margin-top:5px!important;
+  }
+  .missionHeader b{
+    font-size:11px!important;
+  }
+  .missionMini{
+    font-size:9px!important;
+    margin:3px 0!important;
+  }
+  .miniBar{
+    height:5px!important;
+  }
+  .gamePlusBlock{
+    margin-top:7px!important;
+  }
+  .tabs{
+    margin-top:4px!important;
+  }
+}
+
 </style>
 </head>
 <body>
@@ -878,6 +935,7 @@ render();
     const sidebar = document.querySelector('.sidebar');
     if(!sidebar) return;
     sidebar.querySelectorAll('.gamePlusBlock').forEach(el=>el.remove());
+    if(state.view !== 'map') return;
 
     const ach = achievements();
     const rewards = rewardItems();
