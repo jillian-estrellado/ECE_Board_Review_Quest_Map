@@ -1481,5 +1481,144 @@ render();
 })();
 </script>
 
+
+<style id="duolingo-style-path-css">
+/* Duolingo-like path layer */
+.duoHero{border:1px solid rgba(34,197,94,.32);background:linear-gradient(135deg,rgba(34,197,94,.16),rgba(56,189,248,.08)),rgba(15,23,42,.78);border-radius:18px;padding:14px;margin:12px 0;display:grid;gap:10px}
+.duoHeroTop{display:flex;justify-content:space-between;gap:10px;align-items:flex-start;flex-wrap:wrap}.duoHero h2{margin:0;color:#f8fafc}.duoStats{display:flex;gap:7px;flex-wrap:wrap}.duoChip{border:1px solid rgba(255,255,255,.12);background:rgba(15,23,42,.68);border-radius:999px;padding:5px 9px;font-size:12px;font-weight:900}.duoChip.hearts{color:#fecdd3}.duoChip.gems{color:#bae6fd}.duoChip.streak{color:#fed7aa}.duoHero .miniBar{height:10px;background:rgba(15,23,42,.75);border:1px solid rgba(255,255,255,.1);border-radius:999px;overflow:hidden}.duoHero .miniBar div{height:100%;background:linear-gradient(90deg,#22c55e,#84cc16,#facc15)}
+.duoPathWrap{display:grid;gap:14px;margin-top:12px}.duoUnit{border:1px solid var(--line);border-radius:18px;background:rgba(21,30,49,.86);overflow:hidden}.duoUnit summary{list-style:none;cursor:pointer;padding:13px 14px;background:#1b2740;display:flex;justify-content:space-between;gap:10px;align-items:center}.duoUnit summary::-webkit-details-marker{display:none}.duoUnit summary h3{margin:0;color:#f8fafc;font-size:17px}.duoPath{position:relative;display:grid;gap:14px;padding:18px 12px 18px 12px}.duoPath:before{content:'';position:absolute;left:35px;top:24px;bottom:24px;width:5px;border-radius:999px;background:linear-gradient(#22c55e,#38bdf8,#a78bfa);opacity:.28}.duoNode{position:relative;display:grid;grid-template-columns:56px 1fr auto;gap:10px;align-items:center;border:1px solid rgba(255,255,255,.09);border-radius:18px;padding:10px;background:rgba(15,23,42,.74)}.duoNode.completed{border-color:rgba(34,197,94,.38);background:rgba(34,197,94,.09)}.duoNode.next{border-color:rgba(250,204,21,.56);box-shadow:0 0 22px rgba(250,204,21,.13);background:linear-gradient(135deg,rgba(250,204,21,.10),rgba(15,23,42,.75))}.duoNode.locked{opacity:.58;filter:saturate(.65)}.duoOrb{width:52px;height:52px;border-radius:50%;display:grid;place-items:center;font-size:23px;font-weight:1000;background:linear-gradient(135deg,#22c55e,#16a34a);color:#052e16;border:3px solid rgba(255,255,255,.18);box-shadow:0 8px 22px rgba(0,0,0,.25);z-index:1}.duoNode.next .duoOrb{background:linear-gradient(135deg,#facc15,#f97316);color:#431407;animation:duoPulse 1.7s ease-in-out infinite}.duoNode.locked .duoOrb{background:#334155;color:#cbd5e1}.duoNode.completed .duoOrb{background:linear-gradient(135deg,#22c55e,#86efac);color:#052e16}.duoLessonTitle{font-weight:1000;color:#f8fafc}.duoLessonMeta{font-size:12px;color:var(--muted);margin-top:3px}.duoStart{white-space:nowrap}.duoStart button{padding:8px 10px!important;font-size:12px!important}.duoStart .lockedLabel{font-size:12px;color:#94a3b8;font-weight:900}.duoPathActions{display:flex;gap:8px;flex-wrap:wrap}.duoSideMini{border:1px solid rgba(34,197,94,.22);background:rgba(34,197,94,.08);border-radius:14px;padding:10px;margin-top:10px}.duoSideMini b{color:#dcfce7}.duoLessonBadge{display:inline-block;margin-left:5px;font-size:10px;border:1px solid rgba(255,255,255,.12);border-radius:999px;padding:2px 6px;color:#cbd5e1}.duoFocused{outline:2px solid rgba(250,204,21,.75)!important;box-shadow:0 0 25px rgba(250,204,21,.22)!important}.duoFocusBanner{border:1px solid rgba(250,204,21,.36);background:rgba(250,204,21,.1);border-radius:14px;padding:10px;margin:10px 0;color:#fef3c7;font-weight:850}.duoChest{border:1px solid rgba(250,204,21,.24);background:rgba(250,204,21,.07);border-radius:14px;padding:10px;margin-top:10px}.duoChestRow{display:flex;justify-content:space-between;gap:8px;align-items:center}.duoHeartsLoss{animation:heartLoss .55s ease-out}
+@keyframes duoPulse{0%,100%{transform:scale(1)}50%{transform:scale(1.07)}}@keyframes heartLoss{0%,100%{transform:translateX(0)}25%{transform:translateX(-3px)}50%{transform:translateX(3px)}75%{transform:translateX(-2px)}}
+@media(max-width:900px){.duoHero{padding:11px;border-radius:15px}.duoChip{font-size:11px;padding:4px 7px}.duoUnit summary{padding:11px}.duoPath{gap:11px;padding:14px 8px}.duoPath:before{left:31px}.duoNode{grid-template-columns:48px 1fr;gap:9px}.duoOrb{width:46px;height:46px;font-size:20px}.duoStart{grid-column:2}.duoStart button{width:100%;padding:9px!important}.duoLessonTitle{font-size:13px}.duoLessonMeta{font-size:11px}}
+</style>
+
+<script id="duolingo-style-path-patch-v1">
+(function(){
+  if(window.__duolingoStylePathLoaded) return;
+  window.__duolingoStylePathLoaded = true;
+
+  state.duo = state.duo || {hearts:5,gems:0,lastHeartDay:dayKey(),chests:{}};
+  function syncDuo(){
+    state.duo = state.duo || {};
+    const today = dayKey();
+    if(state.duo.lastHeartDay !== today){ state.duo.hearts = 5; state.duo.lastHeartDay = today; }
+    if(typeof state.duo.hearts !== 'number') state.duo.hearts = 5;
+    if(typeof state.duo.gems !== 'number') state.duo.gems = 0;
+    state.duo.chests = state.duo.chests || {};
+  }
+  function escDuo(x){ return typeof escHTML==='function' ? escHTML(x) : String(x||'').replace(/[&<>\"]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m])); }
+  function qListForSubject(subId){ return quests.filter(q=>q.subject===subId); }
+  function firstUnlockedQuest(){
+    for(const sub of subjects){
+      const arr=qListForSubject(sub.id);
+      for(let i=0;i<arr.length;i++){
+        const prev=i===0 || state.done[arr[i-1].id];
+        if(prev && !state.done[arr[i].id]) return arr[i];
+      }
+    }
+    return quests.find(q=>!state.done[q.id]) || quests[0];
+  }
+  function lessonNumber(q){ return qListForSubject(q.subject).findIndex(x=>x.id===q.id)+1; }
+  function focusQuest(qid){
+    const q=quests.find(x=>x.id===qid); if(!q) return;
+    state.subject=q.subject; state.filter='all'; state.view='quests'; state.focusQuest=qid; save(); render();
+    setTimeout(()=>{
+      const row=document.querySelector(`.quest[data-id="${qid}"]`);
+      if(row){ row.classList.add('duoFocused'); const drawer=row.querySelector('.lessonDrawer'); if(drawer) drawer.open=true; row.scrollIntoView({behavior:'smooth',block:'center'}); }
+    },80);
+  }
+  window.duoFocusQuest = focusQuest;
+
+  const oldRenderMission = renderMission;
+  renderMission = function(s){
+    syncDuo();
+    const el=document.getElementById('dailyMission'); if(!el){ if(oldRenderMission) oldRenderMission(s); return; }
+    const target=state.dailyTarget||3;
+    const qDone=s.today.quests||0;
+    const due=quests.filter(q=>state.done[q.id]&&reviewStatus(q.id).due).length;
+    const progress=Math.min(100,(qDone/target)*100);
+    const next=firstUnlockedQuest();
+    const hearts='❤️'.repeat(Math.max(0,state.duo.hearts))+'🤍'.repeat(Math.max(0,5-state.duo.hearts));
+    el.innerHTML=`<div class="missionCard compactMission hpMission duoMission"><div class="missionHeader"><b>🦉 Daily Lesson</b><span>${qDone}/${target}</span></div><div class="miniBar"><div style="width:${progress}%"></div></div><div class="missionMini"><span title="Hearts refill daily">${hearts}</span><span>💎 ${state.duo.gems||0}</span><span>🔥 ${s.streak} day streak</span></div><div class="miniAction"><select id="targetSelect"><option value="1" ${target===1?'selected':''}>1 lesson</option><option value="3" ${target===3?'selected':''}>3 lessons</option><option value="5" ${target===5?'selected':''}>5 lessons</option></select><button class="primary pulseBtn" id="nextActionBtn">${due?'🌀 Review':'▶️ Start'}</button></div><div class="small" style="margin-top:6px">Next: ${next?escDuo(next.item):'All lessons cleared'}</div></div>`;
+    const sel=document.getElementById('targetSelect'); if(sel) sel.onchange=e=>{state.dailyTarget=parseInt(e.target.value,10);save();render();};
+    const btn=document.getElementById('nextActionBtn'); if(btn) btn.onclick=()=>{ if(due){state.view='review';save();render();} else if(next) focusQuest(next.id); };
+  };
+
+  const oldRenderMap = renderMap;
+  renderMap = function(){
+    syncDuo();
+    const el=document.getElementById('view-map'); if(!el){ if(oldRenderMap) oldRenderMap(); return; }
+    const s=stats(); const next=firstUnlockedQuest();
+    const dailyTarget=state.dailyTarget||3;
+    const dailyDone=s.today.quests||0;
+    const dailyPct=Math.min(100,Math.round(dailyDone/dailyTarget*100));
+    const hearts='❤️'.repeat(Math.max(0,state.duo.hearts))+'🤍'.repeat(Math.max(0,5-state.duo.hearts));
+    const unitHtml=subjects.map(sub=>{
+      const arr=qListForSubject(sub.id); const done=arr.filter(q=>state.done[q.id]).length;
+      const firstUndone=arr.find(q=>!state.done[q.id]);
+      const open=(state.subject===sub.id || (firstUndone && next && firstUndone.id===next.id) || done===0)?' open':'';
+      const nodes=arr.map((q,i)=>{
+        const completed=!!state.done[q.id];
+        const unlocked=i===0 || !!state.done[arr[i-1].id] || completed;
+        const isNext=!completed && unlocked && (!next || q.id===next.id || arr.find(x=>!state.done[x.id])?.id===q.id);
+        const cls=completed?'completed':(isNext?'next':(unlocked?'unlocked':'locked'));
+        const icon=completed?'✓':(unlocked?(isNext?'▶':'★'):'🔒');
+        const badge=q.nt?'New':(q.core?'Core':(state.weak[q.id]?'Weak':'Lesson'));
+        return `<div class="duoNode ${cls}" data-id="${q.id}"><button class="duoOrb" ${unlocked?`onclick="duoFocusQuest('${q.id}')"`:'disabled'}>${icon}</button><div><div class="duoLessonTitle">${escDuo(q.item)} <span class="duoLessonBadge">${badge}</span></div><div class="duoLessonMeta">Lesson ${i+1} • ${escDuo(q.chapter)} • +${q.xp} XP</div></div><div class="duoStart">${unlocked?`<button class="${isNext?'primary':'secondary'}" onclick="duoFocusQuest('${q.id}')">${completed?'Review':'Start'}</button>`:'<span class="lockedLabel">Locked</span>'}</div></div>`;
+      }).join('');
+      const chestReady=done>0 && done%5===0 && !state.duo.chests[sub.id+'_'+done];
+      return `<details class="duoUnit"${open}><summary><div><h3>${sub.title}</h3><div class="small">${done}/${arr.length} lessons • ${sub.weight}% exam weight</div></div><div class="badges"><span class="badge ${done===arr.length?'good':'warn'}">${Math.round(done/arr.length*100)}%</span>${chestReady?'<span class="badge warn">Chest</span>':''}</div></summary><div class="duoPath">${nodes}</div>${chestReady?`<div class="duoChest"><div class="duoChestRow"><div><b>🎁 Unit chest ready</b><div class="small">Claim +25 gems for finishing ${done} lessons in this subject.</div></div><button class="primary" onclick="duoClaimChest('${sub.id}',${done})">Claim</button></div></div>`:''}</details>`;
+    }).join('');
+    el.innerHTML=`<div class="duoHero"><div class="duoHeroTop"><div><h2>Lesson Path</h2><p class="small">Small locked lessons, one visible next step, daily streak, hearts, and gems.</p></div><div class="duoStats"><span class="duoChip hearts">${hearts}</span><span class="duoChip gems">💎 ${state.duo.gems||0}</span><span class="duoChip streak">🔥 ${s.streak}</span><span class="duoChip">⭐ ${s.xp} XP</span></div></div><div class="miniBar"><div style="width:${dailyPct}%"></div></div><div class="duoPathActions"><button class="primary" onclick="duoFocusQuest('${next?next.id:''}')">▶️ Continue lesson</button><button class="secondary" onclick="state.view='review';save();render();">🌀 Review due</button><button class="secondary" onclick="state.view='practice';save();render();">⚔️ Practice</button></div></div><div class="duoPathWrap">${unitHtml}</div>`;
+  };
+
+  window.duoClaimChest = function(subId,doneCount){
+    syncDuo(); const key=subId+'_'+doneCount; if(state.duo.chests[key]) return;
+    state.duo.chests[key]=true; state.duo.gems=(state.duo.gems||0)+25; save();
+    if(typeof showToast==='function') showToast('🎁 Chest claimed: +25 gems.');
+    render();
+  };
+
+  const oldCompleteQuestFromRow = completeQuestFromRow;
+  completeQuestFromRow = function(row,id){
+    const wasDone = !!(state.done && state.done[id]);
+    oldCompleteQuestFromRow(row,id);
+    if(!wasDone){ syncDuo(); state.duo.gems=(state.duo.gems||0)+10; save(); }
+  };
+
+  const oldBindQuestEvents = bindQuestEvents;
+  bindQuestEvents = function(){
+    oldBindQuestEvents();
+    if(state.focusQuest){
+      const row=document.querySelector(`.quest[data-id="${state.focusQuest}"]`);
+      if(row){
+        row.classList.add('duoFocused');
+        if(!row.querySelector('.duoFocusBanner')) row.querySelector('.questTop')?.insertAdjacentHTML('afterend','<div class="duoFocusBanner">▶️ Current lesson — finish the tasks to clear this node.</div>');
+        const drawer=row.querySelector('.lessonDrawer'); if(drawer) drawer.open=true;
+      }
+    }
+  };
+
+  const oldMaybeComplete = maybeCompleteQuestFromTasks;
+  maybeCompleteQuestFromTasks = function(el){
+    const row=el.closest('.quest[data-id]');
+    oldMaybeComplete(el);
+    if(row && state.done && state.done[row.dataset.id]){ delete state.focusQuest; save(); }
+  };
+
+  const oldRender = render;
+  render = function(){
+    syncDuo();
+    oldRender();
+    const sb=document.querySelector('.sidebar');
+    if(sb && !sb.querySelector('.duoSideMini')){
+      sb.insertAdjacentHTML('beforeend',`<div class="duoSideMini"><b>Duolingo mode</b><div class="small">Path nodes lock in order. Finish one lesson at a time. Hearts refill daily; gems reward completed lessons.</div></div>`);
+    }
+  };
+
+  save();
+  render();
+})();
+</script>
+
 </body>
 </html>
